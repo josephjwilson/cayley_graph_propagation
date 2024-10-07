@@ -10,6 +10,23 @@ Cayley Graph Propagation (**CGP**) is a unqiue paper that addresses the [*over-s
 ## Getting started
 To have an understanding of CGP we have created a starter guide in the form of an easy to follow [Google Colab](https://github.com/josephjwilson/cayley_graph_propagation/blob/main/Cayley_Graph_Propagation.ipynb). We hope this stand-alone file [Google Colab](https://github.com/josephjwilson/cayley_graph_propagation/blob/main/Cayley_Graph_Propagation.ipynb) provides an entry point for new GNN practitioner, or those simply wanted to implement CGP in their own models. The Google Colab shows how ease of modifying any repository to use CGP.
 
+## Running CGP
+To easily run CGP we make use of config files with the base file found in `utils/config.py`. This file format should provide guidance if you want to be easily able to adjust a hyperparameter. Here is an example:
+
+```python
+# Running CGP on MUTAG for TUDataset baseline
+python main.py --cfg configs/TUDataset/graph_rewiring/base/GIN/mutag.yaml
+```
+
+In addition, you can pass command line arguments to make alterations to an existing config file. Here, we update specify the number of layers, use `gnn.num_layers`. Refer to the aforementioned `utils/config.py` file to have an understanding of the syntax.
+
+```python
+# Running CGP on MUTAG for TUDataset baseline, but manually set the number of layers to 5
+python main.py --cfg configs/TUDataset/graph_rewiring/base/GIN/mutag.yaml gnn.num_layers 5
+```
+
+Notably, it is worth noting that the TUDataset has a lot of stochasticity, therefore it makes reproducing the results found in our paper less reliable.
+
 ### Acknowledgements
 
 In order to build this repository we would leveraged the open-source provided by following authors: [OGB](https://github.com/snap-stanford/ogb), [FoSR](https://github.com/kedar2/FoSR), and [LRGB](https://github.com/vijaydwivedi75/lrgb). Accordingly, we would also like to thank them for making our development process easier. 
