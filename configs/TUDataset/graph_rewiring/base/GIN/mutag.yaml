@@ -1,0 +1,23 @@
+device: 0
+metric: ACC
+dataset:
+  format: PyG
+  name: MUTAG
+train:
+  batch_size: 64
+  stopping_patience: 100
+  loss_fn: cross_entropy
+gnn:
+  num_layers: 4
+  hidden_dim: 64
+  layer_type: GIN
+  pool: mean
+  dropout: 0.0
+optim:
+  optimiser: adam
+  base_lr: 0.001
+  max_epochs: 300
+  scheduler: 'reduce_on_plateau'
+  scheduler_factor: 0.1
+  scheduler_patience: 20
+  scheduler_min_lr: 1e-5
