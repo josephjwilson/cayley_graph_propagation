@@ -1,0 +1,19 @@
+device: 0
+metric: ACC
+dataset:
+  format: OGB
+  name: ogbg-ppa
+train:
+  stopping_patience: 101
+  loss_fn: cross_entropy
+gnn:
+  num_layers: 5
+  hidden_dim: 300
+  layer_type: GIN
+  pool: mean
+  dropout: 0.5
+  node_encoder: Atom
+optim:
+  optimiser: adam
+  base_lr: 0.001
+  max_epochs: 100

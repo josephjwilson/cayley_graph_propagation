@@ -18,6 +18,9 @@ def create_optimiser(model):
         raise ValueError('Invalid optimiser')
 
 def create_scheduler(optimiser):
+    if cfg.optim.scheduler is None:
+        return None
+
     if cfg.optim.scheduler == 'reduce_on_plateau':
         return ReduceLROnPlateau(
             optimizer=optimiser,

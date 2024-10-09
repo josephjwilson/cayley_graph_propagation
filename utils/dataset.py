@@ -1,6 +1,9 @@
 from utils.config import cfg
+from transforms.PpaTransform import PpaTransform
+
 from torch_geometric.datasets import TUDataset
 from torch_geometric.datasets import LRGBDataset
+from ogb.graphproppred import PygGraphPropPredDataset
 from torch.utils.data import random_split
 
 tu_datasets = ['MUTAG', 'ENZYMES', 'PROTEINS', 'COLLAB', 'IMDB-BINARY', 'REDDIT-BINARY']
@@ -12,6 +15,9 @@ def load_datasets():
             return load_tu_dataset()
         elif cfg.dataset.name in lrgb_datasets:
             raise ValueError('Dataset does not exist')
+    elif cfg.dataset.format == 'OGB':
+        pre_transform = PpaTransform() if cfg.dataset.name.lower() == "ogbg-ppa" else None
+        return load_ogb_dataset(pre_transform)
     else:
         raise ValueError('Dataset does not exist')
 
@@ -42,6 +48,21 @@ def load_lrgb_dataset(pre_transform = None):
     set_output_dim_if_required(train_dataset.num_classes)
 
     return train_dataset, validation_dataset, test_dataset, None
+
+def load_ogb_dataset(pre_transform = None):
+    dataset = PygGraphPropPredDataset(name=cfg.dataset.name, root=make_dir_root(), pre_transform=pre_transform)
+
+    split_idx = dataset.get_idx_split()
+    
+    # no need to set input_dim - OGB uses node encoder
+    output_dim = dataset.num_classes if cfg.dataset.name.lower() == "ogbg-ppa" else dataset.num_tasks
+    set_output_dim_if_required(output_dim)
+
+    train_dataset = dataset[split_idx["train"]]
+    validation_dataset = dataset[split_idx["valid"]]
+    test_dataset = dataset[split_idx["test"]]
+
+    return train_dataset, validation_dataset, test_dataset, dataset
 
 def set_input_dim_if_required(input_dim):
     # Set the input_dim if not manually specified

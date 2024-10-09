@@ -11,29 +11,30 @@ def set_cfg(cfg):
     cfg.metric = 'ACC'
 
     cfg.dataset = CN()
-    cfg.dataset.format = 'PyG'
-    cfg.dataset.name = 'MUTAG'
+    cfg.dataset.format = 'PyG' # OGB, PyG
+    cfg.dataset.name = 'MUTAG' # Dataset specific
     cfg.dataset.dir = './datasets'
 
     cfg.train = CN()
     cfg.train.batch_size = 64
     cfg.train.stopping_patience = 50
-    cfg.train.loss_fn = 'cross_entropy'
+    cfg.train.loss_fn = 'cross_entropy' # 'cross_entropy' 'BCE'
 
     cfg.gnn = CN()
     cfg.gnn.num_layers = 5
     cfg.gnn.hidden_dim = 300
     cfg.gnn.input_dim = None
     cfg.gnn.output_dim = None
-    cfg.gnn.layer_type = 'GIN'
+    cfg.gnn.layer_type = 'GIN' # GIN, GCN
     cfg.gnn.dropout = 0.5
     cfg.gnn.pool = 'mean'
+    cfg.gnn.node_encoder = None # 'Atom', 'Uniform'
 
     cfg.optim = CN()
     cfg.optim.optimiser = 'adam'
     cfg.optim.base_lr = 0.001
     cfg.optim.max_epochs = 100
-    cfg.optim.scheduler = 'reduce_on_plateau'
+    cfg.optim.scheduler = None # 'reduce_on_plateau'
     # Default scheduler parameters
     cfg.optim.scheduler_factor = 0.1
     cfg.optim.scheduler_patience = 10
