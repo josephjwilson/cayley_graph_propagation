@@ -1,23 +1,28 @@
 from utils.config import cfg
-from transforms.PpaTransform import PpaTransform
 
+from torch_geometric.transforms import Compose
 from torch_geometric.datasets import TUDataset
 from torch_geometric.datasets import LRGBDataset
 from ogb.graphproppred import PygGraphPropPredDataset
 from torch.utils.data import random_split
 
+from transforms.TuTransform import TuTransform
+from transforms.PpaTransform import PpaTransform
+from transforms.ExpanderTransform import ExpanderTransform
+
 tu_datasets = ['MUTAG', 'ENZYMES', 'PROTEINS', 'COLLAB', 'IMDB-BINARY', 'REDDIT-BINARY']
 lrgb_datasets = ['Peptides-func']
 
 def load_datasets():
+    transforms = compose_transforms()
+
     if cfg.dataset.format == 'PyG':
         if cfg.dataset.name in tu_datasets:
-            return load_tu_dataset()
+            return load_tu_dataset(transforms)
         elif cfg.dataset.name in lrgb_datasets:
             raise ValueError('Dataset does not exist')
     elif cfg.dataset.format == 'OGB':
-        pre_transform = PpaTransform() if cfg.dataset.name.lower() == "ogbg-ppa" else None
-        return load_ogb_dataset(pre_transform)
+        return load_ogb_dataset(transforms)
     else:
         raise ValueError('Dataset does not exist')
 
@@ -64,6 +69,27 @@ def load_ogb_dataset(pre_transform = None):
 
     return train_dataset, validation_dataset, test_dataset, dataset
 
+def compose_transforms() -> Compose | None:
+    transforms = []
+
+    if cfg.dataset.name is not None:
+        dataset_name = cfg.dataset.name.lower()
+        if dataset_name in ['collab', 'reddit-binary', 'imdb-binary']:
+            transforms.append(TuTransform())
+        elif dataset_name == 'ogbg-ppa':
+            transforms.append(PpaTransform())
+    else:
+        raise ValueError("No dataset has been chosen")
+
+    if cfg.transform.name is not None:
+        transform_name = cfg.transform.name.lower()
+        if transform_name in ['egp', 'cgp']:
+            transforms.append(ExpanderTransform())
+        else:
+            raise ValueError(f"Transform does not exist: {transform_name}")
+    
+    return None if not transforms else Compose(transforms)
+
 def set_input_dim_if_required(input_dim):
     # Set the input_dim if not manually specified
     if cfg.gnn.input_dim is None:
@@ -84,6 +110,6 @@ def make_dir_root() -> str:
     else:
         raise ValueError('todo:')
 
-    transform_name = 'base'
+    transform_name = 'base' if cfg.transform.name is None else cfg.transform.name.lower()
 
     return f'{cfg.dataset.dir}/{folder_name}/{transform_name}'

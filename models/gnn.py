@@ -23,9 +23,7 @@ class GNN(torch.nn.Module):
         self.graph_pred_linear = torch.nn.Linear(cfg.gnn.hidden_dim, cfg.gnn.output_dim)
 
     def forward(self, batched_data):
-        h_node = self.gnn_node(batched_data)
-
-        batch_indicator = batched_data.batch
+        h_node, batch_indicator = self.gnn_node(batched_data)
 
         h_graph = self.pool(h_node, batch_indicator)
 

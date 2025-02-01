@@ -4,6 +4,15 @@ In this repository, we provide the code for Cayley Graph Propagation (**CGP**). 
 
 *Note*: this is an active repository, therefore in the following days I will be uploading the full repository used to recreate the results as in our CGP paper.
 
+---
+
+Upcoming updates the week of **(Feb 01 2024)** (_sorry for the delay_):
+
+* Update the repository to reflect the pubilshed version of [Cayley Graph Propagation](https://openreview.net/forum?id=VaTfEDs6lE&referrer=%5Bthe%20profile%20of%20JJ%20Wilson%5D(%2Fprofile%3Fid%3D~JJ_Wilson1)).
+* Add typing
+* Add the other transformations
+* Add all the config files for reproducibility
+
 ## TL;DR
 Cayley Graph Propagation (**CGP**) is a unqiue paper that addresses the [*over-squashing*](https://arxiv.org/abs/2111.14522) through a novel model that does not require *dedicated preprocessing*. We use the deserible botleneck-free graph structure, known as Cayley graphs as from [EGP](https://arxiv.org/abs/2210.02997). However, in CGP we leverage the complete Cayley graph structure that may not align perfectly with a corresponding input graph. Therefore, we have to handle the additional nodes as *virtual nodes*. In this repository we will illustrate how that is done!
 

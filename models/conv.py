@@ -26,10 +26,27 @@ class GNN_node(torch.nn.Module):
 
     def forward(self, batched_data):
             x = self.node_encoder(batched_data.x) if self.node_encoder is not None else batched_data.x.float()
+            batch = batched_data.batch
+
+            is_cgp = cfg.transform.name == "CGP"
+            if is_cgp:
+                # Expander the embeddings with the virtual nodes
+                # Here, we just overwrite the virtual nodes to zero, but more to be added (todo)
+                x_embeddings = torch.zeros((x.shape[0], x.shape[1]), device=x.device)
+                x_embeddings[~batched_data.virtual_node_mask] = x[~batched_data.virtual_node_mask]
+
+                h_list = [x_embeddings]
+            else:
+                h_list = [x.float()]
 
             h_list = [x]
 
             for layer in range(self.num_layer):
+                if cfg.transform.name in ['EGP', 'CGP'] and layer % 2 == 1:
+                    h = self.convs[layer](h_list[layer], batched_data.rewiring_edge_index)
+                else:
+                    h = self.convs[layer](h_list[layer], batched_data.edge_index)
+
                 h = self.convs[layer](h_list[layer], batched_data.edge_index)
                 h = self.batch_norms[layer](h)
 
@@ -39,10 +56,14 @@ class GNN_node(torch.nn.Module):
                     h = F.dropout(F.relu(h), self.dropout)
 
                 h_list.append(h)
-
+                
             node_representation = h_list[-1]
+            
+            if is_cgp:
+                node_representation = node_representation[~batched_data.virtual_node_mask]
+                batch = batch[~batched_data.virtual_node_mask]
 
-            return node_representation
+            return node_representation, batch
 
     def _get_node_encoder(self, hidden_dim):
         if cfg.gnn.node_encoder is None:

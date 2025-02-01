@@ -3,7 +3,7 @@ from utils.config import cfg
 
 from torch_geometric.loader import DataLoader
 
-def create_loaders():
+def create_loaders() -> tuple[DataLoader, DataLoader, DataLoader, DataLoader]:
     train_dataset, validation_dataset, test_dataset, complete_dataset = load_datasets()
 
     train_loader = DataLoader(train_dataset, batch_size=cfg.train.batch_size, shuffle=True)

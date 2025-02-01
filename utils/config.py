@@ -40,6 +40,9 @@ def set_cfg(cfg):
     cfg.optim.scheduler_patience = 10
     cfg.optim.scheduler_min_lr = 0.0
 
+    cfg.transform = CN()
+    cfg.transform.name = None
+
 def load_cfg(cfg, args):
     r"""
     Load configurations from file system and command line

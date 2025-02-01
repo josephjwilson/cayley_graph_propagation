@@ -6,7 +6,7 @@ from tqdm import tqdm
 from utils.config import cfg
 from sklearn.metrics import roc_auc_score
 
-def eval_epoch(loader, model, device):
+def eval_epoch(loader, model, device) -> float:
     model.eval()
     y_true = []
     y_pred = []
@@ -29,7 +29,7 @@ def eval_epoch(loader, model, device):
 
     return _compute_metric(y_true, y_pred)
 
-def _compute_metric(y_true, y_pred):
+def _compute_metric(y_true, y_pred) -> float:
     metric = cfg.metric.upper()
     if metric == 'ACC':
         return _eval_acc(y_true, y_pred)
@@ -38,7 +38,7 @@ def _compute_metric(y_true, y_pred):
     else:
         raise ValueError(f'Invalid metric type: {metric}')
 
-def _eval_acc(y_true, y_pred):
+def _eval_acc(y_true, y_pred) -> float:
     acc_list = []
 
     for i in range(y_true.shape[1]):
@@ -50,7 +50,7 @@ def _eval_acc(y_true, y_pred):
 
     return result
 
-def _eval_rocauc(y_true, y_pred):
+def _eval_rocauc(y_true, y_pred) -> float:
     '''
         compute ROC-AUC averaged across tasks
     '''
