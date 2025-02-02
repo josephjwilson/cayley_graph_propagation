@@ -1,0 +1,44 @@
+# Ignore dataset folder
+datasets/
+
+# Ignore Python cache files
+**/__pycache__/
+
+# Ignore model checkpoints and logs
+*.ckpt
+*.h5
+*.pth
+*.pt
+*.onnx
+logs/
+checkpoints/
+
+# Ignore virtual environment
+venv/
+.env/
+.venv/
+
+# Ignore compiled Python files
+*.pyc
+*.pyo
+*.pyd
+
+# Ignore Jupyter Notebook checkpoints
+.ipynb_checkpoints/
+
+# Ignore system files
+.DS_Store
+Thumbs.db
+
+# Ignore temporary files
+*.swp
+*.swo
+
+# Ignore VS Code settings
+.vscode/
+
+# Ignore large debug logs
+debug.log
+
+# Ignore Conda environment files
+conda-meta/
