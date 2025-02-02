@@ -9,6 +9,7 @@ from torch.utils.data import random_split
 from transforms.TuTransform import TuTransform
 from transforms.PpaTransform import PpaTransform
 from transforms.ExpanderTransform import ExpanderTransform
+from transforms.FullyAdjacentTransform import FullyAdjacentTransform
 
 tu_datasets = ['MUTAG', 'ENZYMES', 'PROTEINS', 'COLLAB', 'IMDB-BINARY', 'REDDIT-BINARY']
 lrgb_datasets = ['Peptides-func']
@@ -70,6 +71,13 @@ def load_ogb_dataset(pre_transform = None):
     return train_dataset, validation_dataset, test_dataset, dataset
 
 def compose_transforms() -> Compose | None:
+    """Create a composition of dataset and graph transforms based on configuration."""
+    dataset_name = cfg.dataset.name.lower() if cfg.dataset.name else None
+    transform_name = cfg.transform.name.lower() if cfg.transform.name else None
+
+    if not dataset_name:
+        raise ValueError("No dataset has been chosen")
+    
     transforms = []
 
     if cfg.dataset.name is not None:
@@ -85,6 +93,8 @@ def compose_transforms() -> Compose | None:
         transform_name = cfg.transform.name.lower()
         if transform_name in ['egp', 'cgp']:
             transforms.append(ExpanderTransform())
+        elif transform_name == 'fa':
+            transforms.append(FullyAdjacentTransform())
         else:
             raise ValueError(f"Transform does not exist: {transform_name}")
     

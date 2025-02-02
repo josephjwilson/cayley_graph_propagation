@@ -41,13 +41,19 @@ class GNN_node(torch.nn.Module):
 
             h_list = [x]
 
-            for layer in range(self.num_layer):
-                if cfg.transform.name in ['EGP', 'CGP'] and layer % 2 == 1:
-                    h = self.convs[layer](h_list[layer], batched_data.rewiring_edge_index)
-                else:
-                    h = self.convs[layer](h_list[layer], batched_data.edge_index)
+            def get_edge_index(layer: int):
+                """Helper function to determine which edge index to use."""
 
-                h = self.convs[layer](h_list[layer], batched_data.edge_index)
+                if (cfg.transform.name in ["EGP", "CGP"] and layer % 2 == 1) or \
+                    (cfg.transform.name == "FA" and layer == self.num_layer - 1):
+                    return batched_data.rewiring_edge_index
+
+                return batched_data.edge_index
+
+            for layer in range(self.num_layer):
+                edge_index = get_edge_index(layer)
+
+                h = self.convs[layer](h_list[layer], edge_index)
                 h = self.batch_norms[layer](h)
 
                 if layer == self.num_layer - 1:
