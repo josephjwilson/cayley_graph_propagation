@@ -1,42 +1,111 @@
+from typing import Optional, Union, Dict, Type, Callable
+
 import torch
-from torch.optim.lr_scheduler import ReduceLROnPlateau
+import torch.nn as nn
+from torch.optim import Optimizer, Adam
+from torch.optim.lr_scheduler import _LRScheduler, ReduceLROnPlateau
 
 from utils.config import cfg
 
-def create_loss_fn():
-    if cfg.train.loss_fn == 'cross_entropy':
-        return torch.nn.CrossEntropyLoss()
-    elif cfg.train.loss_fn == 'BCE':
-        return torch.nn.BCEWithLogitsLoss()
-    else:
-        raise ValueError('Loss function does not exist')
+# Map of supported loss functions
+LOSS_MAP: Dict[str, Type[nn.Module]] = {
+    'cross_entropy': nn.CrossEntropyLoss,
+    'bce': nn.BCEWithLogitsLoss,
+}
 
-def create_optimiser(model):
-    if cfg.optim.optimiser == 'adam':
-        return torch.optim.Adam(model.parameters(), lr=cfg.optim.base_lr)
-    else:
-        raise ValueError('Invalid optimiser')
+# Map of supported optimizers
+OPTIMIZER_MAP: Dict[str, Type[Optimizer]] = {
+    'adam': Adam,
+}
 
-def create_scheduler(optimiser):
+# Map of supported schedulers
+SCHEDULER_MAP: Dict[str, Callable] = {
+    'reduce_on_plateau': ReduceLROnPlateau,
+}
+
+def create_loss_fn() -> nn.Module:
+    """
+    Create loss function based on configuration.
+    
+    Returns:
+        PyTorch loss function
+        
+    Raises:
+        ValueError: If specified loss function does not exist
+    """
+    loss_name = cfg.train.loss_fn.lower()
+    
+    if loss_name not in LOSS_MAP:
+        available_losses = list(LOSS_MAP.keys())
+        raise ValueError(f"Loss function '{loss_name}' is not supported. "
+                         f"Available options: {available_losses}")
+    
+    return LOSS_MAP[loss_name]()
+
+def create_optimizer(model: nn.Module) -> Optimizer:
+    """
+    Create optimizer for model training.
+    
+    Args:
+        model: PyTorch model to optimize
+        
+    Returns:
+        PyTorch optimizer
+        
+    Raises:
+        ValueError: If specified optimizer does not exist
+    """
+    optimizer_name = cfg.optim.optimiser.lower()
+    
+    if optimizer_name not in OPTIMIZER_MAP:
+        available_optimizers = list(OPTIMIZER_MAP.keys())
+        raise ValueError(f"Optimizer '{optimizer_name}' is not supported. "
+                         f"Available options: {available_optimizers}")
+    
+    return OPTIMIZER_MAP[optimizer_name](model.parameters(), lr=cfg.optim.base_lr)
+
+def create_scheduler(optimizer: Optimizer) -> Optional[Union[_LRScheduler, ReduceLROnPlateau]]:
+    """
+    Create learning rate scheduler based on configuration.
+    
+    Args:
+        optimizer: PyTorch optimizer
+        
+    Returns:
+        PyTorch scheduler or None if not configured
+        
+    Raises:
+        ValueError: If specified scheduler does not exist
+    """
     if cfg.optim.scheduler is None:
         return None
-
-    if cfg.optim.scheduler == 'reduce_on_plateau':
-        return ReduceLROnPlateau(
-            optimizer=optimiser,
+    
+    scheduler_name = cfg.optim.scheduler.lower()
+    
+    if scheduler_name not in SCHEDULER_MAP:
+        available_schedulers = list(SCHEDULER_MAP.keys())
+        raise ValueError(f"Scheduler '{scheduler_name}' is not supported. "
+                         f"Available options: {available_schedulers}")
+    
+    # Create scheduler with appropriate parameters
+    if scheduler_name == 'reduce_on_plateau':
+        return SCHEDULER_MAP[scheduler_name](
+            optimizer=optimizer,
             factor=cfg.optim.scheduler_factor,
             patience=cfg.optim.scheduler_patience,
             min_lr=cfg.optim.scheduler_min_lr
         )
-    else:
-        raise ValueError(f'Invalid optimiser: {cfg.optim.scheduler}')
+    
+    return None
 
-def params_count(model):
-    '''
-    Computes the number of parameters.
-
+def params_count(model: nn.Module) -> int:
+    """
+    Compute the number of parameters in a model.
+    
     Args:
-        model (nn.Module): PyTorch model
-
-    '''
-    return sum([p.numel() for p in model.parameters()])
+        model: PyTorch model
+        
+    Returns:
+        int: Total number of parameters
+    """
+    return sum(p.numel() for p in model.parameters())

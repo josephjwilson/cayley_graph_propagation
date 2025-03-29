@@ -6,7 +6,7 @@ In this repository, we provide the code for Cayley Graph Propagation (**CGP**). 
 
 ---
 
-Upcoming updates the week of **(Feb 01 2024)** (_sorry for the delay_):
+Upcoming updates the week of **(March 29 2025)** (_sorry for the delay_):
 
 * Update the repository to reflect the pubilshed version of [Cayley Graph Propagation](https://openreview.net/forum?id=VaTfEDs6lE&referrer=%5Bthe%20profile%20of%20JJ%20Wilson%5D(%2Fprofile%3Fid%3D~JJ_Wilson1)).
 * Add typing
