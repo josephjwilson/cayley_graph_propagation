@@ -1,8 +1,9 @@
 import torch
 
 from torch_geometric.transforms import BaseTransform
-from torch_geometric.utils import remove_self_loops
 from torch_geometric.data import Data
+
+from rewiring.factory import RewireFactory
 
 class FullyAdjacentTransform(BaseTransform):
     """
@@ -36,13 +37,8 @@ class FullyAdjacentTransform(BaseTransform):
             The transformed Data object with the fully connected edge structure
             added as rewiring_edge_index
         """
-        all_nodes: torch.Tensor = torch.arange(0, data.num_nodes)
-        fully_edge_index: torch.Tensor = torch.cartesian_prod(all_nodes, all_nodes).T
+        # Get fully connected edge structure from the rewiring strategy
+        rewiring = RewireFactory.get_strategy('FullyAdjacent')
+        data.rewiring_edge_index = rewiring.rewire(data.num_nodes)
         
-        # Remove self-loops from the fully connected edge structure
-        fully_edge_index_no_sl, _ = remove_self_loops(fully_edge_index)
-
-        # Store the fully connected edge structure as rewiring_edge_index
-        data.rewiring_edge_index = fully_edge_index_no_sl
-
         return data
