@@ -3,6 +3,11 @@ from typing import Dict, Type, Optional
 from rewiring.base import RewireStrategy
 from rewiring.expander import EGPRewiring, CGPRewiring
 from rewiring.fully_adjacent import FullyAdjacentRewiring
+from rewiring.fosr import FosrRewiring
+from rewiring.digl import DiglRewiring
+from rewiring.sdrf import SdrfRewiring
+from rewiring.borf import BorfRewiring
+from rewiring.gtr import GtrRewiring
 
 class RewireFactory:
     """
@@ -17,9 +22,14 @@ class RewireFactory:
     _strategies: Dict[str, Type[RewireStrategy]] = {
         'EGP': EGPRewiring,
         'CGP': CGPRewiring,
-        'FullyAdjacent': FullyAdjacentRewiring
+        'FullyAdjacent': FullyAdjacentRewiring,
+        'FoSR': FosrRewiring,
+        'DIGL': DiglRewiring,
+        'SDRF': SdrfRewiring,
+        'BORF': BorfRewiring,
+        'GTR': GtrRewiring
     }
-    
+
     @classmethod
     def get_strategy(cls, name: str) -> Optional[RewireStrategy]:
         """
@@ -55,4 +65,4 @@ class RewireFactory:
         Returns:
             List of strategy names
         """
-        return list(cls._strategies.keys()) 
+        return list(cls._strategies.keys())

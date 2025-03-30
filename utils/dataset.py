@@ -12,6 +12,11 @@ from transforms.TuTransform import TuTransform
 from transforms.PpaTransform import PpaTransform
 from transforms.ExpanderTransform import ExpanderTransform
 from transforms.FullyAdjacentTransform import FullyAdjacentTransform
+from transforms.DiglTransform import DiglTransform
+from transforms.SdrfTransform import SdrfTransform
+from transforms.BorfTransform import BorfTransform
+from transforms.GtrTransform import GtrTransform
+from transforms.FosrTransform import FosrTransform
 
 # Type aliases
 DatasetLoader = Callable[[Optional[Compose]], Tuple[Any, Any, Any, Any]]
@@ -42,6 +47,21 @@ TRANSFORM_MAP: Dict[str, Dict[str, Any]] = {
     },
     'fa': {
         'class': FullyAdjacentTransform,
+    },
+    'digl': {
+        'class': DiglTransform,
+    },
+    'sdrf': {
+        'class': SdrfTransform,
+    },
+    'borf': {
+        'class': BorfTransform,
+    },
+    'gtr': {
+        'class': GtrTransform,
+    },
+    'fosr': {
+        'class': FosrTransform,
     }
 }
 
@@ -221,7 +241,43 @@ def compose_transforms() -> Optional[Compose]:
             raise ValueError(f"Transform '{transform_name}' does not exist. "
                             f"Available options: {available_transforms}")
             
-        if transform_name in ['egp', 'cgp']:
+        # Create and configure the appropriate transform
+        if transform_name == 'digl':
+            transforms.append(DiglTransform(
+                alpha=cfg.transform.alpha if hasattr(cfg.transform, 'alpha') else 0.1,
+                k=cfg.transform.k if hasattr(cfg.transform, 'k') else 128,
+                eps=cfg.transform.eps if hasattr(cfg.transform, 'eps') else None
+            ))
+        elif transform_name == 'sdrf':
+            transforms.append(SdrfTransform(
+                loops=cfg.transform.loops if hasattr(cfg.transform, 'loops') else 10,
+                remove_edges=cfg.transform.remove_edges if hasattr(cfg.transform, 'remove_edges') else True,
+                removal_bound=cfg.transform.removal_bound if hasattr(cfg.transform, 'removal_bound') else 0.5,
+                tau=cfg.transform.tau if hasattr(cfg.transform, 'tau') else 1,
+                is_undirected=cfg.transform.is_undirected if hasattr(cfg.transform, 'is_undirected') else False
+            ))
+        elif transform_name == 'borf':
+            transforms.append(BorfTransform(
+                loops=cfg.transform.loops if hasattr(cfg.transform, 'loops') else 10,
+                remove_edges=cfg.transform.remove_edges if hasattr(cfg.transform, 'remove_edges') else True,
+                removal_bound=cfg.transform.removal_bound if hasattr(cfg.transform, 'removal_bound') else 0.5,
+                tau=cfg.transform.tau if hasattr(cfg.transform, 'tau') else 1,
+                is_undirected=cfg.transform.is_undirected if hasattr(cfg.transform, 'is_undirected') else False,
+                batch_add=cfg.transform.batch_add if hasattr(cfg.transform, 'batch_add') else 4,
+                batch_remove=cfg.transform.batch_remove if hasattr(cfg.transform, 'batch_remove') else 2,
+                algorithm=cfg.transform.algorithm if hasattr(cfg.transform, 'algorithm') else 'borf3'
+            ))
+        elif transform_name == 'gtr':
+            transforms.append(GtrTransform(
+                num_edges=cfg.transform.num_edges if hasattr(cfg.transform, 'num_edges') else 10,
+                try_gpu=cfg.transform.try_gpu if hasattr(cfg.transform, 'try_gpu') else True
+            ))
+        elif transform_name == 'fosr':
+            transforms.append(FosrTransform(
+                num_iterations=cfg.transform.num_iterations if hasattr(cfg.transform, 'num_iterations') else 100,
+                initial_power_iters=cfg.transform.initial_power_iters if hasattr(cfg.transform, 'initial_power_iters') else 10
+            ))
+        elif transform_name in ['egp', 'cgp']:
             transforms.append(ExpanderTransform())
         elif transform_name == 'fa':
             transforms.append(FullyAdjacentTransform())

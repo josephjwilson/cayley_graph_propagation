@@ -76,7 +76,32 @@ def _configure_optimization(cfg: CN) -> None:
 def _configure_transform(cfg: CN) -> None:
     """Configure graph transformation settings"""
     cfg.transform = CN()
-    cfg.transform.name = None  # Alternatives: 'EGP', 'CGP', 'FA'
+    cfg.transform.name = None  # Alternatives: 'EGP', 'CGP', 'FA', 'DIGL', 'SDRF', 'BORF', 'GTR', 'FoSR'
+    
+    # DIGL parameters
+    cfg.transform.alpha = 0.1     # Teleport probability in PPR computation
+    cfg.transform.k = 128         # Number of neighbors to keep per node
+    cfg.transform.eps = None      # Threshold for edge clipping
+    
+    # SDRF/BORF common parameters
+    cfg.transform.loops = 10            # Number of rewiring iterations
+    cfg.transform.remove_edges = True   # Whether to also remove high-curvature edges
+    cfg.transform.removal_bound = 0.5   # Minimum curvature for edge removal
+    cfg.transform.tau = 1               # Temperature parameter for softmax sampling
+    cfg.transform.is_undirected = False # Whether the graph is undirected
+    
+    # BORF-specific parameters
+    cfg.transform.batch_add = 4          # Number of edges to add in each iteration
+    cfg.transform.batch_remove = 2       # Number of edges to remove in each iteration
+    cfg.transform.algorithm = 'borf3'    # BORF algorithm to use ('borf2' or 'borf3')
+    
+    # GTR parameters
+    cfg.transform.num_edges = 10      # Number of edges to add to the graph
+    cfg.transform.try_gpu = True      # Whether to use GPU acceleration if available
+    
+    # FoSR parameters
+    cfg.transform.num_iterations = 100    # Number of iterations for spectral rewiring
+    cfg.transform.initial_power_iters = 10  # Number of power iterations for initialization
 
 def load_cfg(cfg: CN, args: Namespace) -> None:
     """

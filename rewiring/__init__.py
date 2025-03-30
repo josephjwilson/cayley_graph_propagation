@@ -9,4 +9,9 @@ key properties.
 Currently supported rewiring methods:
 - Cayley graph-based expander structures (EGP and CGP)
 - Fully adjacent (complete graph) rewiring
+- First-Order Spectral Rewiring (FoSR)
+- Diffusion Improves Graph Learning (DIGL)
+- Stochastic Discrete Ricci Flow (SDRF)
+- Balanced Optimal Ricci Flow (BORF)
+- Graph Traversal Rewiring (GTR)
 """ 
