@@ -78,6 +78,9 @@ def _configure_transform(cfg: CN) -> None:
     cfg.transform = CN()
     cfg.transform.name = None  # Alternatives: 'EGP', 'CGP', 'FA', 'DIGL', 'SDRF', 'BORF', 'GTR', 'FoSR'
     
+    # Control how rewiring is scheduled across GNN layers
+    cfg.transform.rewiring_schedule = 'base'  # Alternatives: 'base', 'rewired', 'interweave', 'last_layer'
+    
     # DIGL parameters
     cfg.transform.alpha = 0.1     # Teleport probability in PPR computation
     cfg.transform.k = 128         # Number of neighbors to keep per node

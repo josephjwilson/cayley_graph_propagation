@@ -107,15 +107,37 @@ class GNN_node(torch.nn.Module):
     
     def _get_edge_index_for_layer(self, layer: int, batched_data) -> torch.Tensor:
         """
-        Determine which edge index to use for the given layer.
+        Determine which edge index to use for the given layer based on configuration.
         
-        For certain transformations (EGP, CGP, FA), alternate between original
-        and rewired edge indices depending on the layer.
+        The behavior is controlled by cfg.transform.rewiring_schedule:
+        - 'base': Always use the original edge_index (default)
+        - 'rewired': Always use the rewired edge_index for all layers
+        - 'interweave': Alternate between original and rewired edges (odd layers use rewired)
+        - 'last_layer': Use original edges for all layers except the final one
+        
+        Returns:
+            The edge index to use for the current layer
         """
-        if (cfg.transform.name in ["EGP", "CGP"] and layer % 2 == 1) or \
-           (cfg.transform.name == "FA" and layer == self.num_layers - 1):
-            return batched_data.rewiring_edge_index
+        # If no transformation applied, always use the original edge_index
+        if cfg.transform.name is None:
+            return batched_data.edge_index
+            
+        # Get the rewiring schedule (default to 'base' if not specified)
+        rewiring_schedule = cfg.transform.rewiring_schedule.lower() if hasattr(cfg.transform, 'rewiring_schedule') else 'base'
         
+        if rewiring_schedule == 'rewired':
+            # Always use rewired edges for all layers
+            return batched_data.rewiring_edge_index
+        elif rewiring_schedule == 'interweave':
+            # Alternate between original and rewired (odd layers use rewired)
+            if layer % 2 == 1:
+                return batched_data.rewiring_edge_index
+        elif rewiring_schedule == 'last_layer':
+            # Use rewired only in the final layer
+            if layer == self.num_layers - 1:
+                return batched_data.rewiring_edge_index
+        
+        # Default: use original edges
         return batched_data.edge_index
 
     def _get_layer_input_dim(self, layer: int) -> int:
