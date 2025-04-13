@@ -1,4 +1,4 @@
-from typing import Tuple, Dict, Any, Optional
+from typing import Tuple, Dict, Any, Optional, Union, Sequence, cast
 
 from utils.dataset import load_datasets
 from utils.config import cfg
@@ -6,7 +6,7 @@ from utils.config import cfg
 from torch_geometric.loader import DataLoader
 from torch.utils.data import Dataset
 
-def create_loaders() -> Tuple[DataLoader, DataLoader, DataLoader, DataLoader]:
+def create_loaders() -> Tuple[DataLoader, DataLoader, DataLoader, Optional[DataLoader]]:
     """
     Create data loaders for train, validation, test, and complete datasets.
     
@@ -40,16 +40,20 @@ def create_loaders() -> Tuple[DataLoader, DataLoader, DataLoader, DataLoader]:
         **loader_config
     )
     
-    complete_loader = create_loader(
-        dataset=complete_dataset,
-        shuffle=False,
-        **loader_config
-    )
+    # Handle case where complete_dataset might be None (for some dataset types)
+    if complete_dataset is not None:
+        complete_loader = create_loader(
+            dataset=complete_dataset,
+            shuffle=False,
+            **loader_config
+        )
+    else:
+        complete_loader = None
 
     return train_loader, validation_loader, test_loader, complete_loader
 
 def create_loader(
-    dataset: Dataset,
+    dataset: Any,
     shuffle: bool,
     **kwargs: Any
 ) -> DataLoader:
@@ -57,7 +61,7 @@ def create_loader(
     Create a DataLoader with consistent configuration.
     
     Args:
-        dataset: Dataset to load
+        dataset: Dataset to load (can be PyTorch Geometric or regular PyTorch dataset)
         shuffle: Whether to shuffle the data
         **kwargs: Additional arguments to pass to DataLoader
         

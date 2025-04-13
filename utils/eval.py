@@ -1,4 +1,4 @@
-from typing import List, Dict, Callable, Union, Optional
+from typing import List, Dict, Callable, Union, Optional, Any, cast
 from functools import partial
 
 import torch
@@ -14,11 +14,8 @@ from sklearn.metrics import roc_auc_score
 # Type aliases
 MetricFunction = Callable[[np.ndarray, np.ndarray], float]
 
-# Map of supported metrics
-METRIC_MAP: Dict[str, MetricFunction] = {
-    'ACC': None,  # Will be set below
-    'ROCAUC': None,  # Will be set below
-}
+# Map of supported metrics - initializing as empty dict and filling later
+METRIC_MAP: Dict[str, MetricFunction] = {}
 
 def eval_epoch(loader: DataLoader, model: Module, device: torch.device) -> float:
     """
@@ -126,9 +123,9 @@ def _eval_rocauc(y_true: np.ndarray, y_pred: np.ndarray) -> float:
         if np.sum(y_true[:, i] == 1) > 0 and np.sum(y_true[:, i] == 0) > 0:
             # Ignore NaN values
             is_labeled = y_true[:, i] == y_true[:, i]
-            rocauc_list.append(
-                roc_auc_score(y_true[is_labeled, i], y_pred[is_labeled, i])
-            )
+            # Cast the result to float to ensure type compatibility
+            score = float(roc_auc_score(y_true[is_labeled, i], y_pred[is_labeled, i]))
+            rocauc_list.append(score)
 
     if not rocauc_list:
         raise RuntimeError('No positively labeled data available. Cannot compute ROC-AUC.')
@@ -141,4 +138,3 @@ METRIC_MAP['ROCAUC'] = _eval_rocauc
 
 # Rename internal function to match public API
 compute_metric = compute_metric  # Public API
-_compute_metric = compute_metric  # For backward compatibility

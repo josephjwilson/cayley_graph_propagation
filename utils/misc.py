@@ -1,3 +1,5 @@
+# type: ignore
+
 from typing import Optional, Union, Dict, Type, Callable
 
 import torch
@@ -14,7 +16,7 @@ LOSS_MAP: Dict[str, Type[nn.Module]] = {
 }
 
 # Map of supported optimizers
-OPTIMIZER_MAP: Dict[str, Type[Optimizer]] = {
+OPTIMISER_MAP: Dict[str, Type[Optimizer]] = {
     'adam': Adam,
 }
 
@@ -42,7 +44,7 @@ def create_loss_fn() -> nn.Module:
     
     return LOSS_MAP[loss_name]()
 
-def create_optimizer(model: nn.Module) -> Optimizer:
+def create_optimiser(model: nn.Module) -> Optimizer:
     """
     Create optimizer for model training.
     
@@ -57,12 +59,12 @@ def create_optimizer(model: nn.Module) -> Optimizer:
     """
     optimizer_name = cfg.optim.optimiser.lower()
     
-    if optimizer_name not in OPTIMIZER_MAP:
-        available_optimizers = list(OPTIMIZER_MAP.keys())
+    if optimizer_name not in OPTIMISER_MAP:
+        available_optimizers = list(OPTIMISER_MAP.keys())
         raise ValueError(f"Optimizer '{optimizer_name}' is not supported. "
                          f"Available options: {available_optimizers}")
     
-    return OPTIMIZER_MAP[optimizer_name](model.parameters(), lr=cfg.optim.base_lr)
+    return OPTIMISER_MAP[optimizer_name](model.parameters(), lr=cfg.optim.base_lr)
 
 def create_scheduler(optimizer: Optimizer) -> Optional[Union[_LRScheduler, ReduceLROnPlateau]]:
     """

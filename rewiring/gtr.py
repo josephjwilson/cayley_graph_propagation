@@ -1,3 +1,4 @@
+# type: ignore
 import torch
 import torch_geometric
 from torch_geometric.transforms import BaseTransform

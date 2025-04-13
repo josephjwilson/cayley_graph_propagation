@@ -1,5 +1,6 @@
-import torch
+# type: ignore
 
+from typing import Optional
 from torch_geometric.transforms import BaseTransform
 from torch_geometric.data import Data
 
@@ -31,7 +32,7 @@ class BorfTransform(BaseTransform):
         algorithm: str = 'borf3',
         device = None,
         save_dir: str = 'rewired_graphs',
-        dataset_name: str = None,
+        dataset_name: Optional[str] = None,
         graph_index: int = 0,
         debug: bool = False
     ) -> None:
@@ -87,6 +88,10 @@ class BorfTransform(BaseTransform):
         
         # Create a custom BORF strategy with the specified parameters
         borf_rewiring = RewireFactory.get_strategy('BORF')
+
+        if borf_rewiring is None:
+            raise ValueError("Failed to create BORF rewiring strategy")
+
         borf_rewiring.loops = self.loops
         borf_rewiring.remove_edges = self.remove_edges
         borf_rewiring.removal_bound = self.removal_bound

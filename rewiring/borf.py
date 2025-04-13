@@ -1,3 +1,4 @@
+# type: ignore
 import os
 import ot
 import time

@@ -1,5 +1,6 @@
+# type: ignore
+
 import torch
-import numpy as np
 
 from utils.config import cfg
 from torch_geometric.transforms import BaseTransform

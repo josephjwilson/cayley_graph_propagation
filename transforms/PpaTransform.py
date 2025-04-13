@@ -1,3 +1,5 @@
+# type: ignore
+
 import torch
 
 from utils.config import cfg

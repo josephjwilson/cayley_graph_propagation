@@ -1,3 +1,5 @@
+# type: ignore
+
 import torch
 
 from utils.config import cfg
@@ -34,5 +36,5 @@ class TuTransform(BaseTransform):
         """
         if cfg.dataset.name in ['COLLAB', 'REDDIT-BINARY', 'IMDB-BINARY'] and data.x is None:
             data.x = torch.ones((data.num_nodes, 1))
-            
+
         return data

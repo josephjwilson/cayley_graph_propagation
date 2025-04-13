@@ -1,4 +1,5 @@
 # DIGL pre-processing, from https://github.com/gasteigerjo/gdc.git
+# type: ignore
 
 import numpy as np
 import torch

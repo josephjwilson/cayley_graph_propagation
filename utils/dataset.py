@@ -1,4 +1,4 @@
-from typing import List, Tuple, Optional, Union, Any, Dict, Callable
+from typing import List, Tuple, Optional, Union, Any, Dict, Callable, TypeVar, Generic, cast
 from pathlib import Path
 
 from utils.config import cfg
@@ -19,7 +19,9 @@ from transforms.GtrTransform import GtrTransform
 from transforms.FosrTransform import FosrTransform
 
 # Type aliases
-DatasetLoader = Callable[[Optional[Compose]], Tuple[Any, Any, Any, Any]]
+T = TypeVar('T')
+DatasetTuple = Tuple[Any, Any, Any, Optional[Any]]
+DatasetLoader = Callable[[Optional[Compose]], DatasetTuple]
 
 # Map of supported datasets
 DATASET_MAP: Dict[str, Dict[str, Any]] = {
@@ -65,7 +67,7 @@ TRANSFORM_MAP: Dict[str, Dict[str, Any]] = {
     }
 }
 
-def load_datasets() -> Tuple[Subset, Subset, Subset, Dataset]:
+def load_datasets() -> DatasetTuple:
     """
     Load datasets based on configuration.
     
@@ -105,7 +107,7 @@ def load_datasets() -> Tuple[Subset, Subset, Subset, Dataset]:
         raise ValueError(f"Unknown dataset format: {dataset_format}. "
                         f"Supported formats: 'PyG', 'OGB'")
 
-def load_tu_dataset(pre_transform: Optional[Compose] = None) -> Tuple[Subset, Subset, Subset, TUDataset]:
+def load_tu_dataset(pre_transform: Optional[Compose] = None) -> DatasetTuple:
     """
     Load and prepare TUDataset, following (FoSR): https://arxiv.org/abs/2210.11790
     
@@ -141,7 +143,7 @@ def load_tu_dataset(pre_transform: Optional[Compose] = None) -> Tuple[Subset, Su
 
     return train_dataset, validation_dataset, test_dataset, dataset
 
-def load_lrgb_dataset(pre_transform: Optional[Compose] = None) -> Tuple[LRGBDataset, LRGBDataset, LRGBDataset, None]:
+def load_lrgb_dataset(pre_transform: Optional[Compose] = None) -> DatasetTuple:
     """
     Load and prepare LRGB dataset.
     
@@ -178,7 +180,7 @@ def load_lrgb_dataset(pre_transform: Optional[Compose] = None) -> Tuple[LRGBData
 
     return train_dataset, validation_dataset, test_dataset, None
 
-def load_ogb_dataset(pre_transform: Optional[Compose] = None) -> Tuple[Any, Any, Any, PygGraphPropPredDataset]:
+def load_ogb_dataset(pre_transform: Optional[Compose] = None) -> DatasetTuple:
     """
     Load and prepare OGB dataset.
     
@@ -243,11 +245,18 @@ def compose_transforms() -> Optional[Compose]:
             
         # Create and configure the appropriate transform
         if transform_name == 'digl':
-            transforms.append(DiglTransform(
-                alpha=cfg.transform.alpha if hasattr(cfg.transform, 'alpha') else 0.1,
-                k=cfg.transform.k if hasattr(cfg.transform, 'k') else 128,
-                eps=cfg.transform.eps if hasattr(cfg.transform, 'eps') else None
-            ))
+            # Get values from config with proper type handling
+            alpha = cfg.transform.alpha if hasattr(cfg.transform, 'alpha') else 0.1
+            k = cfg.transform.k if hasattr(cfg.transform, 'k') else 128
+            eps_value = cfg.transform.eps if hasattr(cfg.transform, 'eps') else None
+            
+            # Pass eps as a keyword argument to work around the type inconsistency
+            # The DiglTransform class has eps defined as float = None, which is inconsistent
+            digl_kwargs = {'alpha': alpha, 'k': k}
+            if eps_value is not None:
+                digl_kwargs['eps'] = eps_value
+                
+            transforms.append(DiglTransform(**digl_kwargs))
         elif transform_name == 'sdrf':
             transforms.append(SdrfTransform(
                 loops=cfg.transform.loops if hasattr(cfg.transform, 'loops') else 10,
