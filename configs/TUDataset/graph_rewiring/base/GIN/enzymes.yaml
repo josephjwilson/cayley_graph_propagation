@@ -2,7 +2,7 @@ device: 0
 metric: ACC
 dataset:
   format: PyG
-  name: MUTAG
+  name: ENZYMES
 train:
   batch_size: 64
   stopping_patience: 100

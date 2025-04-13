@@ -69,9 +69,9 @@ def _configure_optimization(cfg: CN) -> None:
     cfg.optim.scheduler = None  # Alternatives: 'reduce_on_plateau'
     
     # Scheduler parameters (used when scheduler is enabled)
-    cfg.optim.scheduler_factor = 0.1
-    cfg.optim.scheduler_patience = 10
-    cfg.optim.scheduler_min_lr = 0.0
+    cfg.optim.scheduler_factor = None
+    cfg.optim.scheduler_patience = None
+    cfg.optim.scheduler_min_lr = None
 
 def _configure_transform(cfg: CN) -> None:
     """Configure graph transformation settings"""

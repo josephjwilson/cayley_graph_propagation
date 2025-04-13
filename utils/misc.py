@@ -88,15 +88,18 @@ def create_scheduler(optimizer: Optimizer) -> Optional[Union[_LRScheduler, Reduc
         available_schedulers = list(SCHEDULER_MAP.keys())
         raise ValueError(f"Scheduler '{scheduler_name}' is not supported. "
                          f"Available options: {available_schedulers}")
-    
+
+    scheduler_kwargs = {'optimizer': optimizer}
+    if cfg.optim.scheduler_factor is not None:
+        scheduler_kwargs['factor'] = cfg.optim.scheduler_factor
+    if cfg.optim.scheduler_patience is not None:
+        scheduler_kwargs['patience'] = cfg.optim.scheduler_patience
+    if cfg.optim.scheduler_min_lr is not None:
+        scheduler_kwargs['min_lr'] = cfg.optim.scheduler_min_lr
+
     # Create scheduler with appropriate parameters
     if scheduler_name == 'reduce_on_plateau':
-        return SCHEDULER_MAP[scheduler_name](
-            optimizer=optimizer,
-            factor=cfg.optim.scheduler_factor,
-            patience=cfg.optim.scheduler_patience,
-            min_lr=cfg.optim.scheduler_min_lr
-        )
+        return SCHEDULER_MAP[scheduler_name](**scheduler_kwargs)
     
     return None
 
